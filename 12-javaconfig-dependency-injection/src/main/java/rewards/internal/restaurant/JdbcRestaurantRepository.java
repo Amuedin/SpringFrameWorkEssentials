@@ -7,6 +7,8 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import common.money.Percentage;
@@ -16,6 +18,7 @@ import common.money.Percentage;
  */
 public class JdbcRestaurantRepository implements RestaurantRepository {
 
+	
 	private DataSource dataSource;
 
 	/**

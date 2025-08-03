@@ -6,6 +6,10 @@ import rewards.Dining;
 import rewards.RewardConfirmation;
 
 import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 import java.sql.*;
 
 /**
@@ -14,6 +18,8 @@ import java.sql.*;
  */
 public class JdbcRewardRepository implements RewardRepository {
 
+	
+	
 	private DataSource dataSource;
 
 	/**
@@ -63,15 +69,24 @@ public class JdbcRewardRepository implements RewardRepository {
 
 	private String nextConfirmationNumber() {
 		String sql = "select next value for S_REWARD_CONFIRMATION_NUMBER from DUAL_REWARD_CONFIRMATION_NUMBER";
+		String sqlOracle = "SELECT S_REWARD_CONFIRMATION_NUMBER.NEXTVAL FROM DUAL"; 
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {
 			conn = dataSource.getConnection();
-			ps = conn.prepareStatement(sql);
-			rs = ps.executeQuery();
-			rs.next();
-			return rs.getString(1);
+			if (conn.getMetaData().getDatabaseProductName().toLowerCase().contains("oracle")) {
+				ps = conn.prepareStatement(sqlOracle);
+				rs = ps.executeQuery();
+				rs.next();
+				return rs.getString(1);
+			} else {
+				ps = conn.prepareStatement(sql);
+				rs = ps.executeQuery();
+				rs.next();
+				return rs.getString(1);
+			}
+
 		} catch (SQLException e) {
 			throw new RuntimeException("SQL exception getting next confirmation number", e);
 		} finally {

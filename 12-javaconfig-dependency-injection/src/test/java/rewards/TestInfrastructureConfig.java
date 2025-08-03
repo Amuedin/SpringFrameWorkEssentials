@@ -1,8 +1,18 @@
 package rewards;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.datasource.DelegatingDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+
+import config.RewardsConfig;
+import config.RewardsOracleConfig;
+import oracle.jdbc.pool.OracleDataSource;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
@@ -53,6 +63,7 @@ import javax.sql.DataSource;
  *
  */
 @Configuration
+@Import(RewardsConfig.class)
 public class TestInfrastructureConfig {
 
 	/**
@@ -60,10 +71,39 @@ public class TestInfrastructureConfig {
 	 * with test data for fast testing
 	 */
 	@Bean
-	public DataSource dataSource() {
+	@Qualifier("hsqlDataSource")
+	public DataSource dataSourceHsql() throws SQLException {
 		return (new EmbeddedDatabaseBuilder()) //
 				.addScript("classpath:rewards/testdb/schema.sql") //
 				.addScript("classpath:rewards/testdb/data.sql") //
 				.build();
+
+	}
+
+	/**
+	 * Connect to an Oracle database locally using an URL and credentials
+	 * 
+	 */
+	@Bean
+	@Qualifier("oracleDataSource")
+	public DataSource dataSourceOracle() throws SQLException {
+		
+		OracleDataSource dataSource = new OracleDataSource();
+		dataSource.setURL("jdbc:oracle:thin:@//localhost:1521/INVENTARIO");
+		dataSource.setUser("user123");
+		dataSource.setPassword("pass123");
+		return new DelegatingDataSource(dataSource) {
+
+			//Inicialmente se creó el esquema de la pdb desde otro usuario(springuser). Al dar acceso al
+			//nuevo usuario(user123) se le ha otorgado el privilegio alter session,
+			//y a través de la siguiente sentencia permitimos que use el esquema del usuario que creó la pdb.
+			@Override
+			public Connection getConnection() throws SQLException {
+				Connection conn = super.getConnection();
+				conn.createStatement().execute("ALTER SESSION SET CURRENT_SCHEMA = springuser");
+				return conn;
+			}
+
+		};
 	}
 }

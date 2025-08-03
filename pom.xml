@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.spring.training.core-spring</groupId>
     <artifactId>parentProject</artifactId>
@@ -59,6 +61,11 @@
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc11</artifactId>
+            <version>23.7.0.25.01</version>
+        </dependency>
 
     </dependencies>
 
@@ -97,6 +104,8 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.maven.plugin}</version>
             </dependency>
+
+
         </dependencies>
     </dependencyManagement>
     <build>
@@ -163,7 +172,7 @@
             </plugin>
         </plugins>
     </build>
-    
+
     <modules>
         <!--
           // KEEP IN SYNC WITH SLIDES
@@ -201,7 +210,7 @@
         <module>34-spring-data-jpa-solution</module>
         <module>36-mvc</module>
         <module>36-mvc-solution</module>
-        
+
         <!-- Day 4 -->
         <module>38-rest-ws</module>
         <module>38-rest-ws-solution</module>
