@@ -2,6 +2,7 @@ package config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import rewards.RewardNetwork;
 import rewards.internal.RewardNetworkImpl;
@@ -21,9 +22,13 @@ import javax.sql.DataSource;
  * - Save all changes, Re-run the RewardNetworkTests.  It should now pass.
  */
 @Configuration
+/*Esta anotación activa la funcionalidad component scanning que busca anotaciones del tipo
+ * @Repository, @Service, etc
+ */
+@ComponentScan("rewards.internal")
 public class RewardsConfig {
 
-	DataSource dataSource;
+	/*DataSource dataSource;
 
 	@Autowired
 	public RewardsConfig(DataSource dataSource) {
@@ -56,7 +61,7 @@ public class RewardsConfig {
 		JdbcRewardRepository repository = new JdbcRewardRepository();
 		repository.setDataSource(dataSource);
 		return repository;
-	}
+	}*/
 	
 	// TODO-02: Remove all of the @Bean methods above.
 	// - Remove the code that autowires DataSource as well.

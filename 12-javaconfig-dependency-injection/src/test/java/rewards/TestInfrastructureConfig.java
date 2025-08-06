@@ -8,7 +8,7 @@ import org.springframework.jdbc.datasource.DelegatingDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
 import config.RewardsConfig;
-import config.RewardsOracleConfig;
+
 import oracle.jdbc.pool.OracleDataSource;
 
 import java.sql.Connection;

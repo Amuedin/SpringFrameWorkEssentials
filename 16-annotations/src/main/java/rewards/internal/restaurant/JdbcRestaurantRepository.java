@@ -1,8 +1,13 @@
 package rewards.internal.restaurant;
 
 import common.money.Percentage;
-import org.springframework.dao.EmptyResultDataAccessException;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Repository;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -44,6 +49,7 @@ import java.util.Map;
  *   We will fix this error in the next step.
  */
 
+ @Repository
 public class JdbcRestaurantRepository implements RestaurantRepository {
 
 	private DataSource dataSource;
@@ -51,6 +57,8 @@ public class JdbcRestaurantRepository implements RestaurantRepository {
 	/**
 	 * The Restaurant object cache. Cached restaurants are indexed
 	 * by their merchant numbers.
+	 * Para evitar multiples acceso a la base de datos, como el restaurante es el mismo
+	 * lo guardamos en esta caché simple
 	 */
 	private Map<String, Restaurant> restaurantCache;
 
@@ -60,14 +68,16 @@ public class JdbcRestaurantRepository implements RestaurantRepository {
 	 * Restaurant cache is populated for read only access
 	 */
 
+	
 	public JdbcRestaurantRepository(DataSource dataSource) {
 		this.dataSource = dataSource;
-		this.populateRestaurantCache();
+		//this.populateRestaurantCache();
 	}
 
 	public JdbcRestaurantRepository() {
 	}
 
+	@Autowired
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
@@ -89,9 +99,15 @@ public class JdbcRestaurantRepository implements RestaurantRepository {
 	 * - Re-run the RewardNetworkTests test. You should see the test succeeds.
 	 * - Note that populating the cache is not really a valid
 	 *   construction activity, so using a post-construct, rather than
-	 *   the constructor, is a better practice.
+	 *   the constructor, is a better practice. 
+	 * Es una buena práctica usar el constructor solo para construir el objeto,
+	 * no añadiendo lógica adicional que acceda a una base de datos, como inicialmente, por eso en este caso
+	 * es mejor usar el @Autowired en el setter que en el constructor, y con la anotacion @PostConstruct
+	 * no aseguramos que el metodo se ejecute cuando el objeto ya ha sido construido y las
+	 * dependencias ya están listas.
 	 */
 
+	@PostConstruct
 	void populateRestaurantCache() {
 		restaurantCache = new HashMap<String, Restaurant>();
 		String sql = "select MERCHANT_NUMBER, NAME, BENEFIT_PERCENTAGE from T_RESTAURANT";
@@ -166,8 +182,11 @@ public class JdbcRestaurantRepository implements RestaurantRepository {
 	 * - Re-run the test and you should be able to see
 	 *   that this method is now being called.
 	 */
+
+	@PreDestroy
 	public void clearRestaurantCache() {
 		restaurantCache.clear();
+		System.out.println("clearRestaurantCache invoked");
 	}
 
 	/**

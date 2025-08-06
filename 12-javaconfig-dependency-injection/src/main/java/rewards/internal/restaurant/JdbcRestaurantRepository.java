@@ -7,8 +7,7 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import common.money.Percentage;
