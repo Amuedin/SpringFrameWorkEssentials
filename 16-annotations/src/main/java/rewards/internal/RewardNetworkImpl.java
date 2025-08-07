@@ -35,7 +35,7 @@ import common.money.MonetaryAmount;
  *   injection or constructor injection.
  */
 
- @Service
+@Service
 public class RewardNetworkImpl implements RewardNetwork {
 
 	private AccountRepository accountRepository;

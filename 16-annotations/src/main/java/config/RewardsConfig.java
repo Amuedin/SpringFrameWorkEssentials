@@ -23,7 +23,8 @@ import javax.sql.DataSource;
  */
 @Configuration
 /*Esta anotación activa la funcionalidad component scanning que busca anotaciones del tipo
- * @Repository, @Service, etc
+ * @Repository, @Service, etc, en el paquete indicado, pues busca paquetes, si no la 
+ * usaramos buscaria en el paquete en el que se encuentra esta clase(config)
  */
 @ComponentScan("rewards.internal")
 public class RewardsConfig {

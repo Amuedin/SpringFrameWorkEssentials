@@ -71,7 +71,7 @@ public class JdbcRestaurantRepository implements RestaurantRepository {
 	
 	public JdbcRestaurantRepository(DataSource dataSource) {
 		this.dataSource = dataSource;
-		//this.populateRestaurantCache();
+		//this.populateRestaurantCache(); //no queremos logica adicional en el constructor
 	}
 
 	public JdbcRestaurantRepository() {
@@ -101,7 +101,8 @@ public class JdbcRestaurantRepository implements RestaurantRepository {
 	 *   construction activity, so using a post-construct, rather than
 	 *   the constructor, is a better practice. 
 	 * Es una buena práctica usar el constructor solo para construir el objeto,
-	 * no añadiendo lógica adicional que acceda a una base de datos, como inicialmente, por eso en este caso
+	 * no añadiendo lógica adicional que acceda a una base de datos, como inicialmente haciamos,
+	 * por eso en este caso
 	 * es mejor usar el @Autowired en el setter que en el constructor, y con la anotacion @PostConstruct
 	 * no aseguramos que el metodo se ejecute cuando el objeto ya ha sido construido y las
 	 * dependencias ya están listas.
