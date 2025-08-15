@@ -9,6 +9,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
 import config.AspectsConfig;
 import config.RewardsConfig;
+import rewards.internal.aspects.DBExceptionHandlingAspect;
 
 
 @Configuration
