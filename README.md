@@ -76,3 +76,11 @@ Implementación de un aspecto de monitorización de rendimiento con @Around para
 
 Ajuste de pruebas (RewardNetworkTests) para validar la presencia de las trazas esperadas en consola y comprobar que los aspectos se aplican correctamente.
 Creación de un aspecto para manejo centralizado de excepciones (DBExceptionHandlingAspect) con @AfterThrowing, interceptando cualquier excepción lanzada por los repositorios y registrando un mensaje de advertencia.
+
+DESCRIPCION MODULO 7: \lab\24-test
+  Mejorar las pruebas de integración utilizando el Spring TestContext framework y los perfiles de Spring.
+    Usar Spring TestContext como forma recomendada de realizar system tests en lugar de crear el Test Context manualmente
+    Escribir múltiples escenarios de prueba.
+    Configurar repositorios alternativos (Stubs o JDBC) mediante perfiles.
+    Cambiar fácilmente entre configuraciones de entorno (local vs JNDI).
+  
