@@ -1,13 +1,20 @@
 package rewards.internal.restaurant;
 
 import common.money.Percentage;
+import io.micrometer.core.lang.NonNull;
+
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import rewards.Dining;
 import rewards.internal.account.Account;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.lang.Nullable;
+
+//import java.sql.Connection;
+//import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -40,16 +47,57 @@ public class JdbcRestaurantRepository implements RestaurantRepository {
 
 	private DataSource dataSource;
 
-	public JdbcRestaurantRepository(DataSource dataSource) {
+	private JdbcTemplate jdbcTemplate;
+
+	public JdbcRestaurantRepository(JdbcTemplate jdbcTemplate) {
 		this.dataSource = dataSource;
+		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	public Restaurant findByMerchantNumber(String merchantNumber) {
 		String sql = "select MERCHANT_NUMBER, NAME, BENEFIT_PERCENTAGE, BENEFIT_AVAILABILITY_POLICY"
 				+ " from T_RESTAURANT where MERCHANT_NUMBER = ?";
-		Restaurant restaurant = null;
 
-		try (Connection conn = dataSource.getConnection();
+		
+		
+		//Creación de RowMapper a través de lambda
+		//Restaurant restaurant = jdbcTemplate.queryForObject(sql, (rs,numRow) -> mapRestaurant(rs), merchantNumber);
+		
+		/*METHOD REFERENCE: para poder usarlo hubo que alinear las firmas de los métodos
+		 * Más abreviado con method reference (::), y modificando los argumentos de
+		 * mapRestaurant para que coincidan
+		 * Este method reference nos dice:  cuando se necesite un RowMapper(callback de queryForObject),
+		 * usa el método mapRestaurant de esta clase como implementación
+		 * Para que el compilador pueda enlazar un metodo con otro, deben coincidir ambos en su firma,
+		 * es decir, en parámetros y retorno. En este caso, firma de mapRestaurant = firma de mapRow.
+		 * Para entender como funciona el compilador: en este caso el compilador convierte el metodo
+		 * mapRestaurant(ResultSet, int) en el metodo implementado de la interfaz funcional RowMapper de 
+		 * manera automatica, de ahi lo comentado antes, pero más completo: cuando se necesite esta interfaz
+		 * funcional(RowMapper), usa esta implementación(mapRestaurant) para el metodo abstracto de RowMapper:
+		 * 			 this::mapRestaurant  >>>  (rs, rowNum) -> this.mapRestaurant(rs, rowNum)
+		 */
+		Restaurant restaurant = jdbcTemplate.queryForObject(sql, this::mapRestaurant, merchantNumber);
+
+
+		/*Creación de RowMapper con clase interna privada
+		RowMapper<Restaurant> rmRes = new RestaurantRowMapper();
+		Restaurant res = jdbcTemplate.queryForObject(sql,rmRes, merchantNumber);
+
+		Creación con clase anónima
+		Restaurant resAnon = jdbcTemplate.queryForObject(sql,new RowMapper<Restaurant>() {
+
+			@Override
+			@Nullable
+			public Restaurant mapRow(@NonNull ResultSet rs, int rowNum) throws SQLException {
+				//Delegamos en el metodo mapRestaurant
+				return mapRestaurant(rs);
+			}
+			
+		}, merchantNumber);*/
+		
+
+
+		/*try (Connection conn = dataSource.getConnection();
 			 PreparedStatement ps = conn.prepareStatement(sql) ){
 			ps.setString(1, merchantNumber);
 			ResultSet rs = ps.executeQuery();
@@ -57,7 +105,9 @@ public class JdbcRestaurantRepository implements RestaurantRepository {
 			restaurant = mapRestaurant(rs);
 		} catch (SQLException e) {
 			throw new RuntimeException("SQL exception occurred finding by merchant number", e);
-		}
+		}*/
+
+		
 
 		return restaurant;
 	}
@@ -66,7 +116,7 @@ public class JdbcRestaurantRepository implements RestaurantRepository {
 	 * Maps a row returned from a query of T_RESTAURANT to a Restaurant object.
 	 * @param rs the result set with its cursor positioned at the current row
 	 */
-	private Restaurant mapRestaurant(ResultSet rs) throws SQLException {
+	private Restaurant mapRestaurant(ResultSet rs, int numRow) throws SQLException {
 		// Get the row column data
 		String name = rs.getString("NAME");
 		String number = rs.getString("MERCHANT_NUMBER");
@@ -145,4 +195,13 @@ public class JdbcRestaurantRepository implements RestaurantRepository {
 			return "neverAvailable";
 		}
 	}
+
+	/*private class RestaurantRowMapper implements RowMapper<Restaurant>{
+
+		@Override
+		public Restaurant mapRow(@NonNull ResultSet rs, int rowNum) throws SQLException {
+			return mapRestaurant(rs);
+		}
+		
+	}*/
 }

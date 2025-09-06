@@ -18,6 +18,11 @@ public class TestInfrastructureJndiConfig {
 
 	/**
 	 * Static method because we are defining a Bean post-processor.
+	 * Al declararlo como static, se registrará al principio del ciclo de vida
+	 * El contenedor (Tomcat, Simple-JNDI, etc.)realiza un lookup con la clave de 
+	 * busqueda y decide cómo resolver ese nombre, en este caso Simple-JNDI, que
+	 * lo mapeará a un fichero de propiedades, en el que normalmente suele definirse un
+	 * DataSource
 	 */
 	@Bean
 	public static SimpleJndiHelper jndiHelper() {
@@ -33,6 +38,6 @@ public class TestInfrastructureJndiConfig {
 	 */
 	@Bean
 	public DataSource dataSource() throws Exception {
-		return (DataSource) (new InitialContext()).lookup("java:/comp/env/jdbc/rewards");
+		return (DataSource) (new InitialContext()).lookup("java:/comp/env/jdbc/rewards"/*Clave de busqueda, no es una ruta */);
 	}
 }

@@ -1,12 +1,20 @@
 package rewards;
 
 import common.money.MonetaryAmount;
+import config.RewardsConfig;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -83,20 +91,33 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Run the test again.
  */
 
+/*This annotation(@PringJUnitConfig) is a composite of @ExtendWith(SpringExtension.class) and
+@ContextConfiguration(TestInfrastructureConfig.class) 
+*La principal ventaja con respecto al crear el contexto manualmente,
+ es que al integrar Spring Test, el contexto(ApplicationContext) se crea una vez por configuración
+y se guarda en caché para todas las pruebas que lo requieran.
+@PringJUnitConfig es más ligera que @SpringBootTest, que lanza un contexto más completo
+*/
+@SpringJUnitConfig(/*classes = TestInfrastructureConfig.class, parte del TODO08, al definirla como clase interna*/)
+@ActiveProfiles({"jdbc","local"})
 public class RewardNetworkTests {
 
 	
 	/**
 	 * The object being tested.
+	 * el test runner de Spring (la extensión de JUnit) hace auto-wiring en el test
+	 *  antes de ejecutar cualquier @Test. Busca en el ApplicationContext un bean del tipo RewardNetwork
+	 *  y asigna esa referencia al campo rewardNetwork del test.
 	 */
+	@Autowired
 	private RewardNetwork rewardNetwork;
 
 	/**
 	 * Need this to enable clean shutdown at the end of the application
 	 */
-	private ConfigurableApplicationContext context;
+	//private ConfigurableApplicationContext context;
 
-	@BeforeEach
+	/*@BeforeEach
 	public void setUp() {
 		// Create the test configuration for the application from one file
 		context = SpringApplication.run(TestInfrastructureConfig.class);
@@ -109,7 +130,7 @@ public class RewardNetworkTests {
 		// simulate the Spring bean destruction lifecycle:
 		if (context != null)
 			context.close();
-	}
+	}*/
 
 	@Test
 	@DisplayName("Test if reward computation and distribution works")
@@ -149,5 +170,17 @@ public class RewardNetworkTests {
 				() -> assertEquals(2, contribution.getDistributions().size()),
 				() -> assertEquals(MonetaryAmount.valueOf("4.00"), contribution.getDistribution("Annabelle").getAmount()),
 				() -> assertEquals(MonetaryAmount.valueOf("4.00"), contribution.getDistribution("Corgan").getAmount()));
+	}
+
+	@Configuration
+	@Import({
+			TestInfrastructureLocalConfig.class,
+			TestInfrastructureJndiConfig.class,
+			RewardsConfig.class })
+	static class TestInfrastructureConfig {
+		@Bean
+		public static LoggingBeanPostProcessor loggingBean() {
+			return new LoggingBeanPostProcessor();
+		}
 	}
 }

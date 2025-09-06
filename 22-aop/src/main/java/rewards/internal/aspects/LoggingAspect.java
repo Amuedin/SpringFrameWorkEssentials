@@ -45,7 +45,7 @@ public class LoggingAspect {
 	/**Este es el advice que se ejecutará antes(@Before)
 	 *  de la ejecución de los metodos que hagan match con la expresión */
 
-	@Before("execution(* *..*Repository.find*(*))")
+	@Before("execution(* *..*Repository.find*(..))")
 	public void implLogging(JoinPoint joinPoint) {
 		// Do not modify this log message or the test will fail
 		logger.info(BEFORE + " advice implementation - " + joinPoint.getTarget().getClass() + //
