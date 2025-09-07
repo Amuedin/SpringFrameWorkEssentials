@@ -83,4 +83,11 @@ DESCRIPCION MODULO 7: \lab\24-test
     Escribir múltiples escenarios de prueba.
     Configurar repositorios alternativos (Stubs o JDBC) mediante perfiles.
     Cambiar fácilmente entre configuraciones de entorno (local vs JNDI).
-  
+
+DESCRIPCION MODULO 8: \lab\26-jdbc
+  Simplificar el acceso a datos JDBC usando Spring y su clase JdbcTemplate.
+    Reducción de código repetitivo al trabajar con JDBC gracias a JdbcTemplate.
+    Diferencias entre RowMapper (fila a objeto) y ResultSetExtractor (result set completo a objeto complejo)
+    Varias formas de implementar mapeos: lambdas, method reference, clases anónimas o privadas.
+    Beneficios de inyectar JdbcTemplate directamente como dependencia.
+    Importancia de las pruebas de integración para validar los cambios en repositorios.
