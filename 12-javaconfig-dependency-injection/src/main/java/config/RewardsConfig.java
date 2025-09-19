@@ -80,7 +80,7 @@ public class RewardsConfig {
 	//Spring ya tiene acceso a los beans y resuelve cualquier dependencia entre las clases,
 	//en este caso le pedimos a Spring un bean de tipo DataSource
 	//AQUI SELECCIONAMOS LA BASE DE DATOS: oracleDataSource // hsqlDataSource
-	public RewardsConfig(@Qualifier("hsqlDataSource") DataSource dataSource){
+	public RewardsConfig(@Qualifier("oracleDataSource") DataSource dataSource){
 		this.dataSource = dataSource;
 	}
 	
