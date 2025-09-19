@@ -42,46 +42,36 @@ Facilitar el desarrollo guiado por pruebas (TDD) con infraestructura realista.
 
 DESCRIPCION MODULO 4: \lab\16-annotations
   Migración de configuración manual a configuración basada en anotaciones:
-
     Uso de estereotipos de Spring: @Service para lógica de negocio y @Repository para clases de acceso a datos.
-
     Inyección de dependencias con @Autowired mediante inyección por constructor (preferida) y por setter.
 
-Configuración de escaneo de componentes con @ComponentScan para detectar clases anotadas y registrar beans automáticamente.
+  Configuración de escaneo de componentes con @ComponentScan para detectar clases anotadas y registrar beans automáticamente.
 
-Ejecución y verificación de pruebas de integración para comprobar la correcta conexión de los componentes.
+  Ejecución y verificación de pruebas de integración para comprobar la correcta conexión de los componentes.
 
-Ciclo de vida de beans y callbacks
-
+  Ciclo de vida de beans y callbacks
     Implementación de inicialización con @PostConstruct en JdbcRestaurantRepository para poblar la caché de restaurantes una vez inyectadas las dependencias.
-
     Implementación de destrucción con @PreDestroy para limpiar la caché al cerrar el contexto de la aplicación.
-
     Comprobación del orden correcto de ejecución y validación con mensajes en consola.
 
 DESCRIPCION MODULO 6: \lab\22-aop
   Creación de un aspecto de logging (LoggingAspect) para registrar la ejecución de métodos find* en las clases de repositorio:
-
     Definición de pointcuts con expresiones execution(...) para filtrar métodos específicos.
-
     Uso de advice @Before para registrar información antes de la ejecución de los métodos interceptados.
-
     Configuración con @Aspect, @Component y escaneo de componentes limitado al paquete rewards.internal.aspects.
 
-Implementación de un aspecto de monitorización de rendimiento con @Around para medir el tiempo de ejecución de métodos update* en los repositorios:
-
+  Implementación de un aspecto de monitorización de rendimiento con @Around para medir el tiempo de ejecución de métodos update* en los repositorios:
     Inicio y parada de mediciones con Monitor y MonitorFactory.
-
     Uso de ProceedingJoinPoint.proceed() para garantizar la ejecución del método real y devolver su valor.
 
-Ajuste de pruebas (RewardNetworkTests) para validar la presencia de las trazas esperadas en consola y comprobar que los aspectos se aplican correctamente.
-Creación de un aspecto para manejo centralizado de excepciones (DBExceptionHandlingAspect) con @AfterThrowing, interceptando cualquier excepción lanzada por los repositorios y registrando un mensaje de advertencia.
+  Ajuste de pruebas (RewardNetworkTests) para validar la presencia de las trazas esperadas en consola y comprobar que los aspectos se aplican correctamente.
+  Creación de un aspecto para manejo centralizado de excepciones (DBExceptionHandlingAspect) con @AfterThrowing, interceptando cualquier excepción lanzada por los repositorios y registrando un mensaje de         advertencia.
 
 DESCRIPCION MODULO 7: \lab\24-test
   Mejorar las pruebas de integración utilizando el Spring TestContext framework y los perfiles de Spring.
     Usar Spring TestContext como forma recomendada de realizar system tests en lugar de crear el Test Context manualmente
     Escribir múltiples escenarios de prueba.
-    Configurar repositorios alternativos (Stubs o JDBC) mediante perfiles.
+    Configurar repositorios alternativos (Stubs o JDBC) mediante @Profiles.
     Cambiar fácilmente entre configuraciones de entorno (local vs JNDI).
 
 DESCRIPCION MODULO 8: \lab\26-jdbc
@@ -91,3 +81,11 @@ DESCRIPCION MODULO 8: \lab\26-jdbc
     Varias formas de implementar mapeos: lambdas, method reference, clases anónimas o privadas.
     Beneficios de inyectar JdbcTemplate directamente como dependencia.
     Importancia de las pruebas de integración para validar los cambios en repositorios.
+
+DESCRIPCION MODULO 9: \lab\28-transactions
+  Usar la gestión declarativa de transacciones en Spring aplicando la anotación @Transactional.
+    Identificar dónde aplicar transacciones en la capa de aplicación.
+    Aplicar transacciones con @Transactional.
+    Configurar un PlatformTransactionManager.
+    Habilitar @EnableTransactionManagement.
+    Ejecutar tests transaccionales con aislamiento automático.
