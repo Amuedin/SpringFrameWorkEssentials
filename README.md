@@ -1,4 +1,1 @@
--Manejo de Spring component scanning y stereotype annotations
--Uso de component scanning con annotations
--Implementación de @PostConstruct y @PreDestroy para implementar lifecycle personalizado
--Inyección de dependencias basada en anotaciones
+
