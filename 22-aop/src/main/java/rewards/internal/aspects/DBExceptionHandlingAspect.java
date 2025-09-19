@@ -1,12 +1,14 @@
 package rewards.internal.aspects;
 
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import rewards.internal.exception.RewardDataAccessException;
 
-
+@Component
 @Aspect	
 public class DBExceptionHandlingAspect {
 	
@@ -21,10 +23,13 @@ public class DBExceptionHandlingAspect {
 	//  - Configure this advice method to enable logging of
 	//	  exceptions thrown by Repository class methods.
 	//	- Select the advice type that seems most appropriate.
-	
+	//In this expression, "e" refers to the advice method parameter name that will receive the thrown exception.
+	@AfterThrowing(value ="execution(* *..*Repository.*(..))", throwing = "e")
 	public void implExceptionHandling(RewardDataAccessException e) {
 		// Log a failure warning
 		logger.warn(EMAIL_FAILURE_MSG + e + "\n");
+		//Podriamos hacer una conversión aqui para que lance un nuevo tipo de excepcion
+		//throw new RewardsException(e)
 	}
 
 	//	TODO-11 (Optional): Annotate this class as a Spring-managed bean.

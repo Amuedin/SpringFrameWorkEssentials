@@ -21,9 +21,16 @@ public class LoggingAspectTests {
 
 	@Test
 	@CaptureSystemOutput
-	public void testLogger(OutputCapture capture) {
-		repository.findByCreditCard("1234123412341234");
+	public void testLogger(OutputCapture capture) { //captura la salida por consola
 
+		/*
+		 * This would be a join point, this
+		 * method will be enhanced with a proxy, not only executing his own code but
+		 * also executing the advice code beforehand
+		 * in another way, this join point is intercepted by a proxy to execute both the
+		 * method's own logic and the advice logic before it.
+		 */
+		repository.findByCreditCard("1234123412341234");
 		if (TestConstants.CHECK_CONSOLE_OUTPUT) {
 			// AOP VERIFICATION
 			// LoggingAspect should have output an INFO message to console

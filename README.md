@@ -1,3 +1,4 @@
+
 DESCRIPCION MODULO 1: \lab\10-spring-intro
   Diseño de lógica de negocio desacoplada de las API de infraestructura.
 
@@ -89,3 +90,4 @@ DESCRIPCION MODULO 9: \lab\28-transactions
     Configurar un PlatformTransactionManager.
     Habilitar @EnableTransactionManagement.
     Ejecutar tests transaccionales con aislamiento automático.
+
