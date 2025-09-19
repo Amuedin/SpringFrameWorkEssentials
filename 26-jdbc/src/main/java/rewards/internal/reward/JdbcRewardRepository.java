@@ -6,6 +6,9 @@ import rewards.Dining;
 import rewards.RewardConfirmation;
 
 import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import java.sql.*;
 
 /**
@@ -35,19 +38,27 @@ import java.sql.*;
 //    in the test task in the build.gradle.)
 
 public class JdbcRewardRepository implements RewardRepository {
-
 	private DataSource dataSource;
+	private JdbcTemplate jdbcTemplate;
 
-	public JdbcRewardRepository(DataSource dataSource) {
+	public JdbcRewardRepository(JdbcTemplate jdbcTemplate) {
 		this.dataSource = dataSource;
+		this.jdbcTemplate = jdbcTemplate;
 	}
-
+	
+	@Override
 	public RewardConfirmation confirmReward(AccountContribution contribution, Dining dining) {
 		String sql = "insert into T_REWARD (CONFIRMATION_NUMBER, REWARD_AMOUNT, REWARD_DATE, ACCOUNT_NUMBER, DINING_MERCHANT_NUMBER, DINING_DATE, DINING_AMOUNT) values (?, ?, ?, ?, ?, ?, ?)";
 		String confirmationNumber = nextConfirmationNumber();
 
+		//Con esta linea estamos insertando a traves de la sentencia sql un una fila T_REWARD, es el 
+		//al jdbc plano usado abajo
+		jdbcTemplate.update(sql, confirmationNumber, contribution.getAmount().asBigDecimal(),
+				new Date(SimpleDate.today().inMilliseconds()), contribution.getAccountNumber(),
+				dining.getMerchantNumber(), new Date(dining.getDate().inMilliseconds()), dining.getAmount().asBigDecimal());
+
 		// Update the T_REWARD table with the new Reward
-		try (Connection conn = dataSource.getConnection();
+		/*try (Connection conn = dataSource.getConnection();
 			 PreparedStatement ps = conn.prepareStatement(sql)) {
 			
 			ps.setString(1, confirmationNumber);
@@ -60,15 +71,28 @@ public class JdbcRewardRepository implements RewardRepository {
 			ps.execute();
 		} catch (SQLException e) {
 			throw new RuntimeException("SQL exception occurred inserting reward record", e);
-		}
+		}*/
 		
 		return new RewardConfirmation(confirmationNumber, contribution);
 	}
 
+	/**
+	 * Con este método obtenemos el próximo valor disponible de la secuencia, como
+	 * la secuencia es un objeto de la base de datos, el valor actual se guarda en la estructura de la BD,
+	 * En los tests usamos una BD en memoria cuyo esquema se recrea al iniciar el
+	 * contexto; el script crea la secuencia con START WITH 1, por lo que el
+	 * contador se reinicia en cada arranque. Si la BD no se recreara o no se
+	 * volviera a ejecutar el CREATE SEQUENCE, la secuencia seguiría
+	 * incrementando.”, tal como se definió en el esquema con : create sequence
+	 * S_REWARD_CONFIRMATION_NUMBER start with 1;
+	 */
 	private String nextConfirmationNumber() {
 		String sql = "select next value for S_REWARD_CONFIRMATION_NUMBER from DUAL_REWARD_CONFIRMATION_NUMBER";
-		String nextValue;
-		
+
+
+		return jdbcTemplate.queryForObject(sql,String.class);
+
+		/* 
 		try (Connection conn = dataSource.getConnection(); 
 			 PreparedStatement ps = conn.prepareStatement(sql);
 			 ResultSet rs = ps.executeQuery()) {
@@ -78,6 +102,6 @@ public class JdbcRewardRepository implements RewardRepository {
 			throw new RuntimeException("SQL exception getting next confirmation number", e);
 		}
 		
-		return nextValue;
+		return nextValue;*/
 	}
 }

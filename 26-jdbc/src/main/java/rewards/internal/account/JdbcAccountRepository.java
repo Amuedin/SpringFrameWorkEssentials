@@ -2,13 +2,19 @@ package rewards.internal.account;
 
 import common.money.MonetaryAmount;
 import common.money.Percentage;
+
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.lang.Nullable;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Loads accounts from a data source using the JDBC API.
@@ -27,10 +33,13 @@ import java.sql.SQLException;
 //   object using the given DataSource object.
 public class JdbcAccountRepository implements AccountRepository {
 
-	private DataSource dataSource;
+	private DataSource dataSource;// Con el uso de jdbcTemplate no es necesario el uso de este campo
 
-	public JdbcAccountRepository(DataSource dataSource) {
+	private JdbcTemplate jdbcTemplate;
+
+	public JdbcAccountRepository(JdbcTemplate jdbcTemplate) {
 		this.dataSource = dataSource;
+		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	// TODO-07 (Optional): Refactor this method using JdbcTemplate and ResultSetExtractor
@@ -47,8 +56,31 @@ public class JdbcAccountRepository implements AccountRepository {
 			"on a.ID = b.ACCOUNT_ID " +
 			"where c.ACCOUNT_ID = a.ID and c.NUMBER = ?";
 		
-		Account account = null;
-		Connection conn = null;
+		/*A diferencia de RowMapper con ResultSetExtractor nosotros controlamos el while(rs.next()).
+		 * En RowMapper Spring lo hace de manera automática. En este caso una cuenta puede tener 
+		 * varias filas de beneficiarios 
+		 */
+		//Account account = jdbcTemplate.query(sql, (ResultSetExtractor<Account>) (rs) -> mapAccount(rs),creditCardNumber);
+
+		/*En este caso la firma del metodo abstracto(extractData) y el metodo al que llamamos(mapAccount)
+		 * son iguales por lo que podemos usar method reference
+		*/
+		Account account = jdbcTemplate.query(sql, this::mapAccount, creditCardNumber);
+
+		
+
+		/*De forma anonima 
+		Account accAn = jdbcTemplate.query(sql, new ResultSetExtractor<Account>() {
+
+			@Override
+			@Nullable
+			public Account extractData(ResultSet rs) throws SQLException, DataAccessException {
+				return mapAccount(rs);
+			}
+			
+		},creditCardNumber);*/
+
+		/*Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {
@@ -81,7 +113,7 @@ public class JdbcAccountRepository implements AccountRepository {
 				} catch (SQLException ex) {
 				}
 			}
-		}
+		}*/
 		return account;
 	}
 
@@ -92,7 +124,13 @@ public class JdbcAccountRepository implements AccountRepository {
 	// - Rerun the JdbcAccountRepositoryTests and verify it passes
 	public void updateBeneficiaries(Account account) {
 		String sql = "update T_ACCOUNT_BENEFICIARY SET SAVINGS = ? where ACCOUNT_ID = ? and NAME = ?";
-		Connection conn = null;
+		
+		for(Beneficiary beneficiary:account.getBeneficiaries() ){
+			jdbcTemplate.update(sql, beneficiary.getSavings().asBigDecimal(),account.getEntityId(),beneficiary.getName());
+		}
+
+		
+		/*Connection conn = null;
 		PreparedStatement ps = null;
 		try {
 			conn = dataSource.getConnection();
@@ -120,7 +158,7 @@ public class JdbcAccountRepository implements AccountRepository {
 				} catch (SQLException ex) {
 				}
 			}
-		}
+		}*/
 	}
 
 	/**
@@ -133,7 +171,9 @@ public class JdbcAccountRepository implements AccountRepository {
 	 */
 	private Account mapAccount(ResultSet rs) throws SQLException {
 		Account account = null;
+		//Recorremos las filas con el puntero
 		while (rs.next()) {
+			//Si account es nulo creamos el objeto
 			if (account == null) {
 				String number = rs.getString("ACCOUNT_NUMBER");
 				String name = rs.getString("ACCOUNT_NAME");
@@ -141,8 +181,9 @@ public class JdbcAccountRepository implements AccountRepository {
 				// set internal entity identifier (primary key)
 				account.setEntityId(rs.getLong("ID"));
 			}
+			//Si ya existe el objeto account o si lo acabamos de crear le agregamos el beneficiario al objeto
 			account.restoreBeneficiary(mapBeneficiary(rs));
-		}
+		} 
 		if (account == null) {
 			// no rows returned - throw an empty result exception
 			throw new EmptyResultDataAccessException(1);

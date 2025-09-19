@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * - Implementing callbacks for converting retrieved data into domain object
  *   - RowMapper
  *   - ResultSetExtractor (optional)
+ *  Este test no levanta el contexto, estamos usando instancias directas
  */
 public class JdbcRewardRepositoryTests {
 
@@ -41,9 +42,12 @@ public class JdbcRewardRepositoryTests {
 
 	@BeforeEach
 	public void setUp() throws Exception {
+		//al no levantar contexto tengo que instanciar el DataSource de manera convencional
 		dataSource = createTestDataSource();
-		repository = new JdbcRewardRepository(dataSource);
 		jdbcTemplate = new JdbcTemplate(dataSource);
+		repository = new JdbcRewardRepository(jdbcTemplate);
+		
+		//jdbcTemplate = new JdbcTemplate(dataSource); se refactoriza en el todo 08
 	}
 
 	@Test
@@ -58,6 +62,7 @@ public class JdbcRewardRepositoryTests {
 		AccountContribution contribution = account.makeContribution(MonetaryAmount.valueOf("8.00"));
 		RewardConfirmation confirmation = repository.confirmReward(contribution, dining);
 		assertNotNull(confirmation, "confirmation should not be null");
+		System.out.println(confirmation.getConfirmationNumber());
 		assertNotNull(confirmation.getConfirmationNumber(), "confirmation number should not be null");
 		assertEquals(contribution, confirmation.getAccountContribution(), "wrong contribution object");
 		verifyRewardInserted(confirmation, dining);
@@ -75,13 +80,12 @@ public class JdbcRewardRepositoryTests {
 		//    the build.gradle file.)
 		//
 		
-		Map<String, Object> values = null;
+		Map<String, Object> values = jdbcTemplate.queryForMap("SELECT * FROM T_REWARD WHERE CONFIRMATION_NUMBER = ?",confirmation.getConfirmationNumber());
 		verifyInsertedValues(confirmation, dining, values);
 	}
 
 	private void verifyInsertedValues(RewardConfirmation confirmation, Dining dining, Map<String, Object> values) {
-		assertEquals(confirmation.getAccountContribution().getAmount(), new MonetaryAmount((BigDecimal) values
-				.get("REWARD_AMOUNT")));
+		assertEquals(confirmation.getAccountContribution().getAmount(), new MonetaryAmount((BigDecimal) values.get("REWARD_AMOUNT")));
 		assertEquals(SimpleDate.today().asDate(), values.get("REWARD_DATE"));
 		assertEquals(confirmation.getAccountContribution().getAccountNumber(), values.get("ACCOUNT_NUMBER"));
 		assertEquals(dining.getAmount(), new MonetaryAmount((BigDecimal) values.get("DINING_AMOUNT")));
@@ -92,7 +96,9 @@ public class JdbcRewardRepositoryTests {
 	private int getRewardCount() throws SQLException {
 		// TODO-01: Use JdbcTemplate to query for the number of rows in the T_REWARD table
 		// - Use "SELECT count(*) FROM T_REWARD" as SQL statement
-		return -1;
+		Integer count =jdbcTemplate.queryForObject("SELECT count(*) FROM T_REWARD", Integer.class);
+		return count != null ? count : 0;
+		//return -1;
 	}
 
 	private DataSource createTestDataSource() {
