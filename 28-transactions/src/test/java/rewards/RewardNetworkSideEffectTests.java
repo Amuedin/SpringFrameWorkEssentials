@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 
@@ -32,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * TODO-10: Add @Transactional on the class and re-run the test. It should pass.
  * Do you know why?
  */
+@Transactional
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { SystemTestConfig.class })
 @TestMethodOrder(MethodOrderer.MethodName.class)
@@ -90,11 +92,13 @@ public class RewardNetworkSideEffectTests {
 	}
 
 	@Test
+	//@Transactional >>> refactorizamos para hacerlo a nivel de clase
 	public void testCollision1stTime() {
 		runTest();
 	}
 
 	@Test
+	//@Transactional
 	public void testCollision2ndTime() {
 		runTest();
 	}

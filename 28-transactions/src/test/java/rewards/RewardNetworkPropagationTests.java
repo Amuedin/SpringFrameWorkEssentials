@@ -59,7 +59,7 @@ public class RewardNetworkPropagationTests {
 
 	@Test
 	public void testPropagation() {
-		// Open a transaction for testing
+		// Open a transaction for testing, our manual transaction
 		TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
 		// Run the test - generate a reward
